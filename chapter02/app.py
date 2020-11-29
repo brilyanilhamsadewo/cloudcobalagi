@@ -62,6 +62,20 @@ def add_user(new_user):
     conn.close()
     return jsonify(a_dict)
 
+def del_user(del_user):
+    conn = sqlite3.connect('mydb.db')
+    print ("Opened database successfully")
+    cursor=conn.cursor()
+    cursor.execute("SELECT * from users where username=? ",(del_user,))
+    data = cursor.fetchall()
+    print ("Data" ,data)
+    if len(data) == 0:
+        abort(404)
+    else:
+       cursor.execute("delete from users where username==?",(del_user,))
+       conn.commit()
+       return "Success"
+
 @app.route("/api/v1/info")
 def home_index():
     conn = sqlite3.connect('mydb.db')
@@ -97,6 +111,13 @@ def create_user():
         'password': request.json['password']
     }
     return jsonify({'status': add_user(user)}), 201
+
+@app.route('/api/v1/users', methods=['DELETE'])
+def delete_user():
+    if not request.json or not 'username' in request.json:
+        abort(400)
+    user=request.json['username']
+    return jsonify({'status': del_user(user)}), 200
 
 @app.errorhandler(404)
 def resource_not_found(error):
