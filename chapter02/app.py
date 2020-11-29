@@ -76,6 +76,25 @@ def del_user(del_user):
        conn.commit()
        return "Success"
 
+def upd_user(user):
+    conn = sqlite3.connect('mydb.db')
+    print ("Opened database successfully")
+    cursor=conn.cursor()
+    cursor.execute("SELECT * from users where id=? ",(user['id'],))
+    data = cursor.fetchall()
+    print (data)
+    if len(data) == 0:
+        abort(404)
+    else:
+        key_list=user.keys()
+        for i in key_list:
+            if i != "id":
+                print (user, i)
+                # cursor.execute("UPDATE users set {0}=? where id=? ", (i, user[i], user['id']))
+                cursor.execute("""UPDATE users SET {0} = ? WHERE id = ?""".format(i), (user[i], user['id']))
+                conn.commit()
+    return "Success"
+
 @app.route("/api/v1/info")
 def home_index():
     conn = sqlite3.connect('mydb.db')
@@ -118,6 +137,19 @@ def delete_user():
         abort(400)
     user=request.json['username']
     return jsonify({'status': del_user(user)}), 200
+
+@app.route('/api/v1/users/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    user = {}
+    # if not request.json:
+    #     abort(400)
+    user['id']=user_id
+    key_list = request.json.keys()
+    for i in key_list:
+        user[i] = request.json[i]
+    print (user)
+
+    return jsonify({'status': upd_user(user)}), 200
 
 @app.errorhandler(404)
 def resource_not_found(error):
