@@ -158,6 +158,10 @@ def list_tweet(user_id):
     conn.close()
     return jsonify(user)
 
+@app.route('/addtweets')
+def addtweetjs():
+    return render_template('addtweets.html')
+
 @app.route("/api/v1/info")
 def home_index():
     conn = sqlite3.connect('mydb.db')
